@@ -56,6 +56,7 @@ boxplot(cs2Raw$JobLevel~cs2Raw$Attrition)
 boxplot(log(cs2Raw$MonthlyIncome)~cs2Raw$Attrition)
 boxplot(cs2Raw$DistanceFromHome~cs2Raw$Attrition)
 
+cs2Raw$AttritionCode = 0; 
 cs2Raw[which(cs2Raw$Attrition == "Yes"),]$AttritionCode = 1
 cs2Raw[which(cs2Raw$Attrition == "No"), ]$AttritionCode = 0
 
@@ -64,12 +65,12 @@ cs2Raw[which(cs2Raw$Attrition == "No"), ]$AttritionCode = 0
 trainset = cs2Raw[1:985,]
 testset = cs2Raw[986:1470,]
 
-modeltest = glm(data = trainset, AttritionCode~JobSatisfaction + factor(Department) + JobLevel + DistanceFromHome + YearsAtCompany + YearsSinceLastPromotion + DistanceFromHome*JobSatisfaction, family = "binomial")
+modeltest = glm(data = trainset, AttritionCode~JobSatisfaction + factor(Department) + factor(JobRole) + JobLevel + DistanceFromHome + YearsAtCompany + YearsSinceLastPromotion + MonthlyIncome + DistanceFromHome*JobSatisfaction, family = "binomial")
 predictions = predict(modeltest, newdata = testset, type = "response")
 
 testset$PredictedAttrition = predictions
-testset[which(testset$PredictedAttrition >= 0.25), ]$PredictedAttrition = 1
-testset[which(testset$PredictedAttrition < 0.25), ]$PredictedAttrition = 0
+testset[which(testset$PredictedAttrition >= 0.33), ]$PredictedAttrition = 1
+testset[which(testset$PredictedAttrition < 0.33), ]$PredictedAttrition = 0
 results = as.data.frame(cbind(testset$AttritionCode, testset$PredictedAttrition))
 View(results)
 
