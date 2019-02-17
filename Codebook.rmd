@@ -1,0 +1,40 @@
+---
+title: "Codebook.rmd"
+author: "Aditya Garapati, Carl Walenciak, Brian Waite"
+date: "2/16/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(kableExtra)
+library(readxl)
+```
+
+## DDS Analytics Talent Management Study Codebook
+
+This codebook provides an overview of the data as it was received and any modifications that were required to support our analysis. It is a documentation of the variables in the data set, any normalization or modifications that were made, and should support replication of our analysis. 
+
+### Data Files Received
+
+DDSAnalytics provided unique(Consulting) with a Microsoft Excel (.xlsx) file titled CaseStudy2-data.xlsx. 
+
+```{r}
+cs2Raw <- read_excel("CaseStudy2-data.xlsx")
+```
+
+### Initial Data Structure
+
+The data contained within the provided table has the following variable names and types: 
+<br>
+
+```{r}
+kable(t(lapply(cs2Raw,class)))%>%
+  kable_styling()%>%
+  scroll_box(height = 100, width = 500)
+```
+
+
+
+
