@@ -1,6 +1,18 @@
 library(readxl)
 cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
 
+groupYearsAtCompany = function(YearsAtCompany){
+  group = character()
+  if (YearsAtCompany >= 0 & YearsAtCompany <= 5) {group = "0-5"}
+  if (YearsAtCompany > 5 & YearsAtCompany <= 10) {group = "5-10"}
+  if (YearsAtCompany > 10 & YearsAtCompany <= 20) {group = "10-20"}
+  if (YearsAtCompany > 20 & YearsAtCompany <= 30) {group = "20-30"}
+  if (YearsAtCompany > 30 & YearsAtCompany <= 40) {group = "30-40"}
+  if (YearsAtCompany > 40) {group = "40+"}
+  return(group)
+}
+
+cs2Raw$YearsAtCompanyGroup = lapply(cs2Raw$YearsAtCompany, groupYearsAtCompany)
 summary(cs2Raw)
 #lots to see here
 
@@ -32,6 +44,9 @@ boxplot(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$JobSatisfaction~cs2R
 mean(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$JobSatisfaction)
 #Mean
 
+#Just exploring something....but it doesn't appear to have born fruit
+boxplot(cs2Raw$JobSatisfaction~as.character(cs2Raw$YearsAtCompanyGroup))
+
 boxplot(cs2Raw$MonthlyIncome~cs2Raw$JobRole, las = 2)
 
 #Looks like people's job satisfaction has nothing to do with how much they are being paid
@@ -43,6 +58,11 @@ barplot(table(cs2Raw[which(cs2Raw$EmployeeMonthlyProfit < 0),5]))
 
 #by job role
 barplot(table(cs2Raw[which(cs2Raw$EmployeeMonthlyProfit < 0),16]), las = 2)
+
+#attrition by
+
+#Department
+
 
 
 #Job satisfaction vs. attrition shows that happy people are not leaving, unhappy people are
@@ -65,12 +85,12 @@ cs2Raw[which(cs2Raw$Attrition == "No"), ]$AttritionCode = 0
 trainset = cs2Raw[1:985,]
 testset = cs2Raw[986:1470,]
 
-modeltest = glm(data = trainset, AttritionCode~JobSatisfaction + factor(Department) + factor(JobRole) + JobLevel + DistanceFromHome + YearsAtCompany + YearsSinceLastPromotion + MonthlyIncome + DistanceFromHome*JobSatisfaction, family = "binomial")
+modeltest = glm(data = trainset, AttritionCode~JobSatisfaction + factor(Department) + factor(JobRole) + DistanceFromHome + YearsAtCompany + YearsSinceLastPromotion + DistanceFromHome*JobSatisfaction, family = "binomial")
 predictions = predict(modeltest, newdata = testset, type = "response")
 
 testset$PredictedAttrition = predictions
-testset[which(testset$PredictedAttrition >= 0.33), ]$PredictedAttrition = 1
-testset[which(testset$PredictedAttrition < 0.33), ]$PredictedAttrition = 0
+testset[which(testset$PredictedAttrition >= 0.34), ]$PredictedAttrition = 1
+testset[which(testset$PredictedAttrition < 0.34), ]$PredictedAttrition = 0
 results = as.data.frame(cbind(testset$AttritionCode, testset$PredictedAttrition))
 View(results)
 
