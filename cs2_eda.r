@@ -80,6 +80,26 @@ cs2Raw$AttritionCode = 0;
 cs2Raw[which(cs2Raw$Attrition == "Yes"),]$AttritionCode = 1
 cs2Raw[which(cs2Raw$Attrition == "No"), ]$AttritionCode = 0
 
+#attrition
+denominator = dim(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),])[1]
+numerator = sum(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$AttritionCode)
+percentAttrition = numerator / denominator * 100
+jobrolelist = unique(cs2Raw$JobRole)
+jobroleAttritionRates = data.frame()
+for (jobrole in jobrolelist) { 
+  denominator = dim(cs2Raw[which(cs2Raw$JobRole == jobrole),])
+  numerator = sum(cs2Raw[which(cs2Raw$JobRole == jobrole),]$AttritionCode)
+  percentAttrition = round(numerator/denominator[1]*100, 2)
+  jobroleAttritionRates = rbind(percentAttrition,jobroleAttritionRates)
+}
+jobroleAttritionRates = cbind(jobroleAttritionRates, jobrolelist)
+jobroleAttritionRates = as.data.frame(jobroleAttritionRates)
+names(jobroleAttritionRates) = c("Rate","JobRole")
+ggplot(jobroleAttritionRates, aes(x = factor(JobRole), y = Rate)) + 
+  xlab("Job Role")+ 
+  ylab("Attrition Rate")+
+  geom_bar(stat = "identity") +
+  coord_flip()
 ############Model Attrition#########################
 
 trainset = cs2Raw[1:985,]
@@ -101,3 +121,16 @@ Recall(results$V1, results$V2)
 Accuracy(results$V1, results$V2)
 
 ####################################################
+
+
+###################################################
+#Model 2
+
+model = glm(data = cs2Raw, formula = AttritionCode~Age + DailyRate + Education + HourlyRate+ JobRole + MonthlyIncome + PerformanceRating + StockOptionLevel + WorkLifeBalance + YearsSinceLastPromotion + Department + EducationField + EnvironmentSatisfaction + JobInvolvement + MonthlyRate + OverTime + RelationshipSatisfaction + TotalWorkingYears + YearsAtCompany + YearsWithCurrManager + BusinessTravel + DistanceFromHome + EmployeeCount + Gender + JobLevel + MaritalStatus + NumCompaniesWorked + PercentSalaryHike + StandardHours + TrainingTimesLastYear + YearsInCurrentRole, family = binomial(logit))
+importance = varImp(model)
+storeNames = row.names(importance)
+storeNames = cbind(storeNames,importance)
+storeNames = arrange(storeNames, -Overall)
+
+names(storeNames) = c("Variable","Importance")
+summary(model)
