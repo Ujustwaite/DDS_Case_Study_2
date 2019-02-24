@@ -1,8 +1,8 @@
 library(readxl)
 library(caret)
 library(dplyr)
-#cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
-cs2Raw <-read_xlsx("C:/Users/garapati/Desktop/data/CaseStudy2-data.xlsx",sheet=1)
+cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
+#cs2Raw <-read_xlsx("C:/Users/garapati/Desktop/data/CaseStudy2-data.xlsx",sheet=1)
 
 groupYearsAtCompany = function(YearsAtCompany){
   group = character()
