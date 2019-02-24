@@ -169,14 +169,13 @@ newdata_stay <- subset(cs2Raw,Attrition=="No" )
 qol_col <- c('Attrition','BusinessTravel','DistanceFromHome','OverTime','MaritalStatus')
 qol_attrition_data <- newdata_attrition[,qol_col]
 qol_stay_data <- newdata_stay[,qol_col]
-p1 <- plot_ly(qol_stay_data,labels=~BusinessTravel,type = 'pie')
-p2 <- plot_ly(qol_attrition_data,labels=~BusinessTravel,type = 'pie')
-p1
-p2
-p1 <- plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')
-p2 <- plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')
-p1
-p2
+plot_ly(qol_stay_data,labels=~BusinessTravel,type = 'pie')%>%layout(title = "Business Travel (people who stayed) ")
+plot_ly(qol_attrition_data,labels=~BusinessTravel,type = 'pie')%>%layout(title = "Business Travel (people who left) ")
+
+plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who stayed) ")
+plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who left) ")
+
+
 
 
 
