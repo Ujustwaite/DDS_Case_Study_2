@@ -2,6 +2,7 @@ library(readxl)
 library(caret)
 library(dplyr)
 cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
+#cs2Raw <-read_xlsx("C:/Users/garapati/Desktop/data/CaseStudy2-data.xlsx",sheet=1)
 
 groupYearsAtCompany = function(YearsAtCompany){
   group = character()
@@ -121,8 +122,6 @@ barplot(table(cs2Raw[which(cs2Raw$EmployeeMonthlyProfit < 0),16]), las = 2)
 
 #Department
 
-
-
 #Job satisfaction vs. attrition shows that happy people are not leaving, unhappy people are
 boxplot(cs2Raw$JobSatisfaction~cs2Raw$Attrition)
 #Maybe we can build a predictor to determine whether people will quit? 
@@ -162,6 +161,25 @@ ggplot(jobroleAttritionRates, aes(x = factor(JobRole), y = Rate)) +
   ylab("Attrition Rate")+
   geom_bar(stat = "identity") +
   coord_flip()
+
+###Addit QOL data by Aditya
+library(plotly)
+newdata_attrition<- subset(cs2Raw, Attrition=="Yes" )
+newdata_stay <- subset(cs2Raw,Attrition=="No" )
+qol_col <- c('Attrition','BusinessTravel','DistanceFromHome','OverTime','MaritalStatus')
+qol_attrition_data <- newdata_attrition[,qol_col]
+qol_stay_data <- newdata_stay[,qol_col]
+p1 <- plot_ly(qol_stay_data,labels=~BusinessTravel,type = 'pie')
+p2 <- plot_ly(qol_attrition_data,labels=~BusinessTravel,type = 'pie')
+p1
+p2
+p1 <- plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')
+p2 <- plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')
+p1
+p2
+
+
+
 ############Model Attrition#########################
 
 trainset = cs2Raw[1:985,]
