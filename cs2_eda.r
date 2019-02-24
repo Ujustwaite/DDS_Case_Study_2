@@ -1,4 +1,6 @@
 library(readxl)
+library(caret)
+library(dplyr)
 cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
 
 groupYearsAtCompany = function(YearsAtCompany){
@@ -19,6 +21,36 @@ summary(cs2Raw)
 hist(cs2Raw$Age)
 #Age looks normal, no "wave" of retirees coming. 
 
+fill <- "#4271AE"
+line <- "#1F3552"
+ggplot(cs2Raw, aes(x = Age)) + 
+  geom_histogram(binwidth = 1.0, color=line, fill=fill) + 
+  ggtitle("DDSAnalytics Employee Age Distribution")+
+  theme_minimal()
+
+#Number of Departments
+length(unique(cs2Raw$Department))
+
+#Number of employees
+length(unique(cs2Raw$EmployeeNumber))
+
+#Number of work roles
+length(unique(cs2Raw$JobRole))
+
+#GenderStats
+male = dim(cs2Raw[which(cs2Raw$Gender == "Male"),])[1]
+maleperc = male / 1470 * 100
+female = dim(cs2Raw[which(cs2Raw$Gender == "Female"),])[1]
+femaleperc = female / 1470 * 100
+genderDF = as.data.frame(c("Male","Female"))
+genderDF = cbind(genderDF, c(maleperc, femaleperc))
+names(genderDF) = c("Gender","Percent")
+genderplot = ggplot(data = genderDF, aes(x = "", y = Percent, fill = Gender)) + geom_bar(width = 1, stat = "identity")
+pie = genderplot + coord_polar("y", start = 0)+ scale_fill_brewer(palette="Blues")+
+  geom_text(aes(y = Percent/2 + c(0, cumsum(Percent)[-length(Percent)]), label = c("Male", "Female")), size=5)+
+  theme_minimal()+
+  ggtitle("Workforce Gender Distribution")+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x=element_blank())
 hist(cs2Raw$PerformanceRating)
 #Performance rating system may not be functioning as desired. Unable to distinguish variations in performance. Lower scores?
 #Need to check definitions. 
@@ -34,9 +66,35 @@ hist(cs2Raw$YearsSinceLastPromotion)
 #Look at Job Satisfaction Stats in different departments
 boxplot(cs2Raw$JobSatisfaction~cs2Raw$Department)
 
+fill <- "#4271AE"
+line <- "#1F3552"
+ggplot(cs2Raw, aes(x = Department, y = JobSatisfaction)) + 
+  geom_boxplot(fill = fill, colour = line, alpha = 0.7)+ 
+  scale_x_discrete(name = "Department")+
+  scale_y_continuous(name = "Job Satisfaction Score Distribution", limits=c(0.5, 4.5))+
+  ggtitle("Job Satisfaction Survey Score by Department")+
+  theme_minimal()
+
 
 #now by work role
 boxplot(cs2Raw$JobSatisfaction~cs2Raw$JobRole, las = 2)
+
+ggplot(cs2Raw, aes(x = JobRole, y = JobSatisfaction)) + 
+  geom_boxplot(fill = fill, colour = line, alpha = 0.7)+ 
+  scale_x_discrete(name = "Job Role")+
+  scale_y_continuous(name = "Job Satisfaction Score Distribution", limits=c(0.5, 4.5))+
+  ggtitle("Job Satisfaction Survey Score by Job Role")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+#Get mean for non-HR roles
+mean_non_HR = mean(cs2Raw[which(cs2Raw$JobRole != "Human Resources"),]$JobSatisfaction)
+#Get mean for HR role
+mean_HR = mean(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$JobSatisfaction)
+#Find the difference
+
+diff = 100-(mean_HR / mean_non_HR)*100
+
+
 #ooohhhhhh There is something interesting! Human Resources Job Satisfaction below average! 
 #Lots of below 3.0s here. 
 boxplot(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$JobSatisfaction~cs2Raw[which(cs2Raw$JobRole == "Human Resources"),]$EmployeeNumber)
@@ -79,6 +137,10 @@ boxplot(cs2Raw$DistanceFromHome~cs2Raw$Attrition)
 cs2Raw$AttritionCode = 0; 
 cs2Raw[which(cs2Raw$Attrition == "Yes"),]$AttritionCode = 1
 cs2Raw[which(cs2Raw$Attrition == "No"), ]$AttritionCode = 0
+
+cs2Raw$OverTimeCode = 0; 
+cs2Raw[which(cs2Raw$OverTime == "Yes"),]$OverTimeCode = 1
+cs2Raw[which(cs2Raw$OverTime == "No"), ]$OverTimeCode = 0
 
 #attrition
 denominator = dim(cs2Raw[which(cs2Raw$JobRole == "Human Resources"),])[1]
@@ -126,7 +188,14 @@ Accuracy(results$V1, results$V2)
 ###################################################
 #Model 2
 
-model = glm(data = cs2Raw, formula = AttritionCode~Age + DailyRate + Education + HourlyRate+ JobRole + MonthlyIncome + PerformanceRating + StockOptionLevel + WorkLifeBalance + YearsSinceLastPromotion + Department + EducationField + EnvironmentSatisfaction + JobInvolvement + MonthlyRate + OverTime + RelationshipSatisfaction + TotalWorkingYears + YearsAtCompany + YearsWithCurrManager + BusinessTravel + DistanceFromHome + EmployeeCount + Gender + JobLevel + MaritalStatus + NumCompaniesWorked + PercentSalaryHike + StandardHours + TrainingTimesLastYear + YearsInCurrentRole, family = binomial(logit))
+model = glm(data = trainset, formula = AttritionCode~Age + DailyRate + Education + HourlyRate+ JobRole + MonthlyIncome + PerformanceRating + StockOptionLevel + WorkLifeBalance + YearsSinceLastPromotion + Department + EducationField + EnvironmentSatisfaction + JobInvolvement + MonthlyRate + OverTime + RelationshipSatisfaction + TotalWorkingYears + YearsAtCompany + YearsWithCurrManager + BusinessTravel + DistanceFromHome + EmployeeCount + Gender + JobLevel + MaritalStatus + NumCompaniesWorked + PercentSalaryHike + StandardHours + TrainingTimesLastYear + YearsInCurrentRole, family = binomial(logit))
+
+model = glm(data = trainset, formula = AttritionCode ~ Age + JobRole + StockOptionLevel + WorkLifeBalance + 
+              YearsSinceLastPromotion + EnvironmentSatisfaction + JobInvolvement + 
+              OverTime + RelationshipSatisfaction + YearsAtCompany + YearsWithCurrManager + 
+              BusinessTravel + DistanceFromHome + Gender + MaritalStatus + 
+              NumCompaniesWorked + YearsInCurrentRole, family = binomial(logit))
+
 importance = varImp(model)
 storeNames = row.names(importance)
 storeNames = cbind(storeNames,importance)
@@ -134,3 +203,17 @@ storeNames = arrange(storeNames, -Overall)
 
 names(storeNames) = c("Variable","Importance")
 summary(model)
+
+predictions = predict(model, newdata = testset, type = "response")
+
+testset$PredictedAttrition = predictions
+testset[which(testset$PredictedAttrition >= 0.5), ]$PredictedAttrition = 1
+testset[which(testset$PredictedAttrition < 0.5), ]$PredictedAttrition = 0
+results = as.data.frame(cbind(testset$AttritionCode, testset$PredictedAttrition))
+View(results)
+
+Precision(results$V1, results$V2)
+Recall(results$V1, results$V2)
+Accuracy(results$V1, results$V2)
+
+
