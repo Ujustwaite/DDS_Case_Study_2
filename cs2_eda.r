@@ -1,8 +1,8 @@
 library(readxl)
 library(caret)
 library(dplyr)
-cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
-#cs2Raw <-read_xlsx("C:/Users/garapati/Desktop/data/CaseStudy2-data.xlsx",sheet=1)
+#cs2Raw <- read_excel("~/SMU/Doing Data Science/CaseStudy2/CaseStudy2-data.xlsx")
+cs2Raw <-read_xlsx("C:/Users/garapati/Desktop/data/CaseStudy2-data.xlsx",sheet=1)
 
 groupYearsAtCompany = function(YearsAtCompany){
   group = character()
@@ -174,7 +174,7 @@ plot_ly(qol_attrition_data,labels=~BusinessTravel,type = 'pie')%>%layout(title =
 
 plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who stayed) ")
 plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who left) ")
-
+plot_ly(x=qol_stay_data$DistanceFromHome, type = "box",name='stay') %>% add_boxplot(x=qol_attrition_data$DistanceFromHome,name='leave')
 
 
 
