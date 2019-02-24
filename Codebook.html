@@ -617,6 +617,72 @@ numeric
 </tbody>
 </table>
 </div>
+<p>Derived variables include:</p>
+<table>
+<colgroup>
+<col width="24%"></col>
+<col width="15%"></col>
+<col width="59%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th align="center">Values</th>
+<th align="right">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AttritionCode</td>
+<td align="center">1 or 0</td>
+<td align="right">If Attrition = “Yes”, AttritionCode = 1 and vice versa</td>
+</tr>
+<tr class="even">
+<td>OvertimeCode</td>
+<td align="center">1 or 0</td>
+<td align="right">If Overtime = “Yes”, OvertimeCode = 1 and vice versa</td>
+</tr>
+<tr class="odd">
+<td>maleperc</td>
+<td align="center">integer</td>
+<td align="right">Percentage of employees that are male from total</td>
+</tr>
+<tr class="even">
+<td>femaleperc</td>
+<td align="center">integer</td>
+<td align="right">Percentage of employees that are female from total</td>
+</tr>
+<tr class="odd">
+<td>mean_hr</td>
+<td align="center">integer</td>
+<td align="right">Mean Job satisfaction of HR employees</td>
+</tr>
+<tr class="even">
+<td>mean_non_hr</td>
+<td align="center">integer</td>
+<td align="right">Mean Job satisfaction of Non-HR employees</td>
+</tr>
+<tr class="odd">
+<td>jobroleAttritionRates</td>
+<td align="center">data.frame</td>
+<td align="right">A data frame containing attrition rates per job role</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="test-models" class="section level3">
+<h3>Test Models</h3>
+<p>A number of test models were created to help identify features provided in the data set that contribute to Attrition rates within the population.</p>
+<div id="model-1-logistic-regression" class="section level4">
+<h4>Model 1: Logistic Regression</h4>
+<p>A logistic regression model to predict whether an employee – based on provided features – would be in class (AttritionCode = 1) or out of Class. This model accepts all of the provided categorical and continuous variables and determines their impact on Attrition. The model is un-normalized and unweighted and provides only a first step analysis. Despite this, however, it is capable of achieving accuracy rates of 87% with Precision values of 90.7% and Recall of 94.9%.</p>
+<p>This model is described by the statement:</p>
+<pre class="r"><code>AttritionCode ~ Age + JobRole + StockOptionLevel + WorkLifeBalance + 
+              YearsSinceLastPromotion + EnvironmentSatisfaction + JobInvolvement + 
+              OverTime + RelationshipSatisfaction + YearsAtCompany + YearsWithCurrManager + 
+              BusinessTravel + DistanceFromHome + Gender + MaritalStatus + 
+              NumCompaniesWorked + YearsInCurrentRole</code></pre>
+</div>
 </div>
 </div>
 
