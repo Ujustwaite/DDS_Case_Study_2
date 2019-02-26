@@ -2,6 +2,7 @@
 title: "DDS Case Study 2"
 output: html_document
 ---
+
 <style type="text/css">
     
     h3 {
@@ -29,6 +30,7 @@ library(kableExtra)
 
 df <- read.csv( "CaseStudy2Data.csv", stringsAsFactors=FALSE)
 
+
 #Add Attrition Code
 df$AttritionCode <- 0
 df[df$Attrition == "Yes", ]$AttritionCode <- 1
@@ -36,6 +38,9 @@ df[df$Attrition == "Yes", ]$AttritionCode <- 1
 #Add IsMale
 df$IsMale <- 0
 df[df$Gender == "Male", ]$IsMale <- 1
+
+df$hasOvertime <- 0
+df[df$OverTime == "Yes", ]$hasOvertime <- 1
 
 #Shorten Names
 df[df$Department == "Research & Development", ]$Department <- "R&D"
@@ -50,6 +55,8 @@ df[df$Age >= 40 & df$Age < 50, ]$AgeGroup <- "40-49"
 df[df$Age >= 50 & df$Age < 60, ]$AgeGroup <- "50-59"
 df[df$Age >= 60, ]$AgeGroup <- "60+"
 df$AgeGroup <- factor(df$AgeGroup, level = c("<20", "20-29", "30-39", "40-49", "50-59", "60+"))
+
+df_raw <- df
 ```
 
 
@@ -139,9 +146,8 @@ df2$`Male Employee %` <- percent(df2$`Male Employees`/df2$`Employee Count`)
 
 kable(df2, row.names = F, align=c('l',rep('c', length(df2) - 1) )) %>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
-
-<br/>  
-<br/>  
+<br/>
+<br/>
 
 <!-------------------------------------------------->
 <!------------------- JOB ROLE --------------------->
@@ -182,6 +188,34 @@ df3$`Male Employee %` <- percent(df3$`Male Employees`/df3$`Employee Count`)
 df3$id <- NULL
 
 kable(df3, row.names = F, align=c('l','l', rep('c', length(df3) - 1) )) %>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+<br/>
+<br/>  
+
+<!-------------------------------------------------->
+<!--------------- AGE GROUP ATTRITION -------------->
+<!-------------------------------------------------->
+
+### **Attrition By Age Group**
+
+<hr/>
+
+<br/>
+
+```{r age_group_attr, fig.align='center', echo=FALSE}
+age_group <- aggregate(df$EmployeeCount, by=list(df$AgeGroup), FUN=sum, drop=FALSE)
+colnames(age_group) <- c("Age Group", "Employee Count")
+
+age_attr <- aggregate(df$AttritionCode, by=list(df$AgeGroup), FUN=sum, drop=FALSE)
+colnames(age_attr) <- c("Age Group", "Attrition Count")
+
+age_group_comb <- merge(age_group, age_attr, by='Age Group')
+age_group_comb$`Attrition % per Group` <- percent(age_group_comb$`Attrition Count`/age_group_comb$`Employee Count`)
+
+```
+
+```{r, echo = FALSE}
+kable(age_group_comb , row.names = F, align=c('l', rep('c', length(df2) - 1) )) %>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
 <br/>
@@ -225,40 +259,40 @@ dept_role_comb$`Attrition Rate per Dept.` <- percent(dept_role_comb$`Attrition C
 ```
 
 
-```{r years_at_co_merge, echo=FALSE}
-years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
-years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
-colnames(years_at_comp)[3] <- 'Avg. Years At Company'
-years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+```{r overtime_merge, echo=FALSE}
+over_time <- aggregate(df$hasOvertime, by=list(df$Department, df$JobRole), FUN=sum)
+over_time$id <- paste(over_time$Group.1, over_time$Group.2)
+
+colnames(over_time)[3] <- 'OverTimeCount'
+
+# Merge
+dept_role_comb <- merge(dept_role_comb, over_time[,c('id', 'OverTimeCount')], by="id")
+dept_role_comb$`Over Time %` <- percent(dept_role_comb$`OverTimeCount`/dept_role_comb$`Employee Count`)
+dept_role_comb$OverTimeCount <- NULL
+```
+
+
+```{r working_years_merge, echo=FALSE}
+working_years <- aggregate(df$TotalWorkingYears, by=list(df$Department, df$JobRole), FUN=mean)
+working_years$id <- paste(working_years$Group.1, working_years$Group.2)
+colnames(working_years)[3] <- 'Avg. Working Years'
+working_years$`Avg. Working Years` <- round(working_years$`Avg. Working Years`, 1)
 
 # Merge Combined and Yearst At Company
-dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+dept_role_comb <- merge(dept_role_comb, working_years[,c('id', 'Avg. Working Years')], by="id")
 ```
 
 
-```{r job_sat_merge, echo=FALSE}
-df_job_sat <- aggregate(df$JobSatisfaction, by=list(df$Department, df$JobRole), FUN=mean)
-df_job_sat$id <- paste(df_job_sat$Group.1, df_job_sat$Group.2)
+```{r mo_income_merge, echo=FALSE}
+mo_income <- aggregate(df$MonthlyIncome, by=list(df$Department, df$JobRole), FUN=mean)
+mo_income$id <- paste(mo_income$Group.1, mo_income$Group.2)
 
-colnames(df_job_sat)[3] <- 'Avg. Job Satisfaction'
-df_job_sat$`Avg. Job Satisfaction` <- round(df_job_sat$`Avg. Job Satisfaction`, 1)
-
-# Merge
-dept_role_comb <- merge(dept_role_comb, df_job_sat[,c('id', 'Avg. Job Satisfaction')], by="id")
-
-```
-
-
-```{r env_sat_merge, echo=FALSE}
-env_sat <- aggregate(df$EnvironmentSatisfaction, by=list(df$Department, df$JobRole), FUN=mean)
-env_sat$id <- paste(env_sat$Group.1, env_sat$Group.2)
-
-colnames(env_sat)[3] <- 'Avg. Env. Satisfaction'
-env_sat$`Avg. Env. Satisfaction` <- round(env_sat$`Avg. Env. Satisfaction`, 1)
+colnames(mo_income)[3] <- 'Avg. Mo. Income'
+mo_income$`Avg. Mo. Income` <- round(mo_income$`Avg. Mo. Income`)
+mo_income$`Avg. Mo. Income` <- format(mo_income$`Avg. Mo. Income`,big.mark=",", trim=TRUE)
 
 # Merge
-dept_role_comb <- merge(dept_role_comb, env_sat[,c('id', 'Avg. Env. Satisfaction')], by="id")
-
+dept_role_comb <- merge(dept_role_comb, mo_income[,c('id', 'Avg. Mo. Income')], by="id")
 ```
 
 
@@ -269,54 +303,212 @@ dept_role_comb$id <- NULL
 kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_comb) -2) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-<br/>
+
+
+<br/>  
 <br/>  
 
 <!-------------------------------------------------->
-<!---------- NUMBER OF COMPANIES WORKED ------------>
+<!---------------- JOB ROLE TRENDS ----------------->
 <!-------------------------------------------------->
 
-### **Number of Companies Worked**
+### **Job Role Trends (Age < 30) **
 <hr/>
 
+<br/>
+
+
+```{r job_role_trends2, echo=FALSE}
+df <- df[df$Age < 30, ]
+
+dept_role <- aggregate(df$EmployeeCount, by=list(df$Department, df$JobRole), FUN=sum, drop=TRUE)
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count")
+dept_role$id <- paste(dept_role$Department, dept_role$`Job Role`)
+
+#Calc Percentage
+# dept_role$Percentage <- percent(dept_role$`Employee Count`/sum(dept_role$`Employee Count`))
+
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id")
+```
+
+
+```{r attrition_merge2, echo=FALSE}
+df_attr <- df[df$AttritionCode == 1, ]
+df_attr <- aggregate(df_attr$AttritionCode, by=list(df_attr$Department, df_attr$JobRole), FUN=sum, drop=FALSE)
+df_attr[is.na(df_attr)] <- 0
+colnames(df_attr) <- c("Department", "JobRole", "Attrition Count")
+df_attr$id <- paste(df_attr$Department, df_attr$JobRole)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role, df_attr[,c('id', 'Attrition Count')], by="id")
+
+# Attrition Percentage
+dept_role_comb$AttrDecimal <- dept_role_comb$`Attrition Count`/dept_role_comb$`Employee Count`
+dept_role_comb$`Attrition Rate per Dept.` <- percent(dept_role_comb$AttrDecimal)
+```
+
+
+```{r overtime_merge2, echo=FALSE}
+over_time <- aggregate(df$hasOvertime, by=list(df$Department, df$JobRole), FUN=sum)
+over_time$id <- paste(over_time$Group.1, over_time$Group.2)
+
+colnames(over_time)[3] <- 'OverTimeCount'
+
+# Merge
+dept_role_comb <- merge(dept_role_comb, over_time[,c('id', 'OverTimeCount')], by="id")
+dept_role_comb$`Over Time %` <- percent(dept_role_comb$`OverTimeCount`/dept_role_comb$`Employee Count`)
+dept_role_comb$OverTimeCount <- NULL
+```
+
+```{r years_at_co_merge2, echo=FALSE, include=FALSE}
+years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
+years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
+colnames(years_at_comp)[3] <- 'Avg. Years At Company'
+years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+```
+
+```{r years_at_co_merge, echo=FALSE, include=FALSE}
+# years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
+# years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
+# colnames(years_at_comp)[3] <- 'Avg. Years At Company'
+# years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+# 
+# # Merge Combined and Yearst At Company
+# dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+```
+
+```{r working_years_merge2, echo=FALSE}
+working_years <- aggregate(df$TotalWorkingYears, by=list(df$Department, df$JobRole), FUN=mean)
+working_years$id <- paste(working_years$Group.1, working_years$Group.2)
+colnames(working_years)[3] <- 'Avg. Working Years'
+working_years$`Avg. Working Years` <- round(working_years$`Avg. Working Years`, 1)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role_comb, working_years[,c('id', 'Avg. Working Years')], by="id")
+```
+
+
+```{r mo_income_merge2, echo=FALSE}
+mo_income <- aggregate(df$MonthlyIncome, by=list(df$Department, df$JobRole), FUN=mean)
+mo_income$id <- paste(mo_income$Group.1, mo_income$Group.2)
+
+colnames(mo_income)[3] <- 'Avg. Mo. Income'
+mo_income$`Avg. Mo. Income` <- round(mo_income$`Avg. Mo. Income`)
+mo_income$`Avg. Mo. Income` <- format(mo_income$`Avg. Mo. Income`,big.mark=",", trim=TRUE)
+
+# Merge
+dept_role_comb <- merge(dept_role_comb, mo_income[,c('id', 'Avg. Mo. Income')], by="id")
+```
+
+
+```{r display_combined_table2, echo=FALSE}
+
+dept_role_comb$id <- NULL
+dept_role_comb <- dept_role_comb[order(-dept_role_comb$AttrDecimal),]
+dept_role_comb$AttrDecimal <- NULL
+
+kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_comb) -2) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+<br/>  
 <br/>  
 
-```{r exp_setup, echo=FALSE}
-df$NumWorkGroup <- ""
-df[df$NumCompaniesWorked < 2, ]$NumWorkGroup <- "<2"
-df[df$NumCompaniesWorked >= 2 & df$NumCompaniesWorked < 5, ]$NumWorkGroup <- "2-4"
-df[df$NumCompaniesWorked >= 5 & df$NumCompaniesWorked < 8, ]$NumWorkGroup <- "5-7"
-df[df$NumCompaniesWorked >= 8, ]$NumWorkGroup <- "8+"
-df$AgeGroup <- factor(df$AgeGroup, level = c("<2", "2-4", "5-7", "8+"))
-```
+<!-------------------------------------------------->
+<!---------------- JOB ROLE TRENDS ----------------->
+<!-------------------------------------------------->
 
-
-```{r num_companies, echo=FALSE}
-num_comp <- aggregate(df$EmployeeCount, by=list(df$NumWorkGroup), FUN=sum)
-colnames(num_comp) <- c("# Companies Worked", "Employee Count")
-
-num_comp_attr <- aggregate(df$AttritionCode, by=list(df$NumWorkGroup), FUN=sum)
-colnames(num_comp_attr) <- c("# Companies Worked", "Attrition Count")
-
-num_comb <- merge(num_comp, num_comp_attr, id=`# Companies Worked`)
-num_comb$`Attrition Rate per Group` <- percent(num_comb$`Attrition Count`/num_comb$`Employee Count`)
-```
+### **Job Role Trends (Age >= 30) **
+<hr/>
 
 <br/>
 
-```{r num_companies_plot, fig.align='center', echo=FALSE}
 
-(ggplot(df, aes(x=NumWorkGroup, y =1, fill =Attrition)) 
-    + geom_bar(stat="identity") 
-    + scale_fill_manual(values=c('lightblue4','cadetblue3'))
-    + theme_minimal()
-    + xlab("Number of Companies Worked")
-    + ylab("Number of Employees")
-    + theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)))
-)
+```{r job_role_trends3, echo=FALSE}
+df <- df_raw[df_raw$Age > 30, ]
 
+dept_role <- aggregate(df$EmployeeCount, by=list(df$Department, df$JobRole), FUN=sum, drop=TRUE)
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count")
+dept_role$id <- paste(dept_role$Department, dept_role$`Job Role`)
+
+#Calc Percentage
+# dept_role$AttrDecimal <- dept_role$`Employee Count`/sum(dept_role$`Employee Count`)
+# dept_role$Percentage <- percent(dept_role$AttrDecimal)
+
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id")
 ```
 
-```{r num_companies_table, echo=FALSE}
-kable(num_comb, row.names = F, align=c('l',rep('c', length(num_comb) - 1) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
+
+```{r attrition_merge3, echo=FALSE}
+df_attr <- df[df$AttritionCode == 1, ]
+df_attr <- aggregate(df_attr$AttritionCode, by=list(df_attr$Department, df_attr$JobRole), FUN=sum, drop=FALSE)
+df_attr[is.na(df_attr)] <- 0
+colnames(df_attr) <- c("Department", "JobRole", "Attrition Count")
+df_attr$id <- paste(df_attr$Department, df_attr$JobRole)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role, df_attr[,c('id', 'Attrition Count')], by="id")
+
+# Attrition Percentage
+dept_role_comb$AttrDecimal <- dept_role_comb$`Attrition Count`/dept_role_comb$`Employee Count`
+dept_role_comb$`Attrition Rate per Dept.` <- percent(dept_role_comb$AttrDecimal)
+```
+
+
+```{r overtime_merge3, echo=FALSE}
+over_time <- aggregate(df$hasOvertime, by=list(df$Department, df$JobRole), FUN=sum)
+over_time$id <- paste(over_time$Group.1, over_time$Group.2)
+
+colnames(over_time)[3] <- 'OverTimeCount'
+
+# Merge
+dept_role_comb <- merge(dept_role_comb, over_time[,c('id', 'OverTimeCount')], by="id")
+dept_role_comb$`Over Time %` <- percent(dept_role_comb$`OverTimeCount`/dept_role_comb$`Employee Count`)
+dept_role_comb$OverTimeCount <- NULL
+```
+
+```{r years_at_co_merge3, echo=FALSE, include=FALSE}
+years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
+years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
+colnames(years_at_comp)[3] <- 'Avg. Years At Company'
+years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+```
+
+```{r working_years_merge3, echo=FALSE}
+working_years <- aggregate(df$TotalWorkingYears, by=list(df$Department, df$JobRole), FUN=mean)
+working_years$id <- paste(working_years$Group.1, working_years$Group.2)
+colnames(working_years)[3] <- 'Avg. Working Years'
+working_years$`Avg. Working Years` <- round(working_years$`Avg. Working Years`, 1)
+
+# Merge Combined and Yearst At Company
+dept_role_comb <- merge(dept_role_comb, working_years[,c('id', 'Avg. Working Years')], by="id")
+```
+
+
+```{r mo_income_merge3, echo=FALSE}
+mo_income <- aggregate(df$MonthlyIncome, by=list(df$Department, df$JobRole), FUN=mean)
+mo_income$id <- paste(mo_income$Group.1, mo_income$Group.2)
+
+colnames(mo_income)[3] <- 'Avg. Mo. Income'
+mo_income$`Avg. Mo. Income` <- round(mo_income$`Avg. Mo. Income`)
+mo_income$`Avg. Mo. Income` <- format(mo_income$`Avg. Mo. Income`,big.mark=",", trim=TRUE)
+
+# Merge
+dept_role_comb <- merge(dept_role_comb, mo_income[,c('id', 'Avg. Mo. Income')], by="id")
+```
+
+
+```{r display_combined_table3, echo=FALSE}
+
+dept_role_comb$id <- NULL
+
+dept_role_comb <- dept_role_comb[order(-dept_role_comb$AttrDecimal), ]
+dept_role_comb$AttrDecimal <- NULL
+
+kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_comb) -2) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
