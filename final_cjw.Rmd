@@ -271,6 +271,15 @@ dept_role_comb$`Over Time %` <- percent(dept_role_comb$`OverTimeCount`/dept_role
 dept_role_comb$OverTimeCount <- NULL
 ```
 
+```{r years_at_co_merge, echo=FALSE, include=FALSE}
+# years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
+# years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
+# colnames(years_at_comp)[3] <- 'Avg. Years At Company'
+# years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+# 
+# # Merge Combined and Yearst At Company
+# dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+```
 
 ```{r working_years_merge, echo=FALSE}
 working_years <- aggregate(df$TotalWorkingYears, by=list(df$Department, df$JobRole), FUN=mean)
@@ -309,7 +318,7 @@ kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_
 <br/>  
 
 <!-------------------------------------------------->
-<!---------------- JOB ROLE TRENDS ----------------->
+<!------------ JOB ROLE TRENDS < 30 ---------------->
 <!-------------------------------------------------->
 
 ### **Job Role Trends (Age < 30) **
@@ -326,9 +335,9 @@ colnames(dept_role) <- c("Department", "Job Role", "Employee Count")
 dept_role$id <- paste(dept_role$Department, dept_role$`Job Role`)
 
 #Calc Percentage
-# dept_role$Percentage <- percent(dept_role$`Employee Count`/sum(dept_role$`Employee Count`))
+dept_role$Percentage <- percent(dept_role$`Employee Count`/sum(dept_role$`Employee Count`))
 
-colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id")
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id","% of Total Employees")
 ```
 
 
@@ -361,16 +370,6 @@ dept_role_comb$OverTimeCount <- NULL
 ```
 
 ```{r years_at_co_merge2, echo=FALSE, include=FALSE}
-years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
-years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
-colnames(years_at_comp)[3] <- 'Avg. Years At Company'
-years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
-
-# Merge Combined and Yearst At Company
-dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
-```
-
-```{r years_at_co_merge, echo=FALSE, include=FALSE}
 # years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
 # years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
 # colnames(years_at_comp)[3] <- 'Avg. Years At Company'
@@ -379,6 +378,8 @@ dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Co
 # # Merge Combined and Yearst At Company
 # dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
 ```
+
+
 
 ```{r working_years_merge2, echo=FALSE}
 working_years <- aggregate(df$TotalWorkingYears, by=list(df$Department, df$JobRole), FUN=mean)
@@ -434,10 +435,9 @@ colnames(dept_role) <- c("Department", "Job Role", "Employee Count")
 dept_role$id <- paste(dept_role$Department, dept_role$`Job Role`)
 
 #Calc Percentage
-# dept_role$AttrDecimal <- dept_role$`Employee Count`/sum(dept_role$`Employee Count`)
-# dept_role$Percentage <- percent(dept_role$AttrDecimal)
+dept_role$Percentage <- percent(dept_role$`Employee Count`/sum(dept_role$`Employee Count`))
 
-colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id")
+colnames(dept_role) <- c("Department", "Job Role", "Employee Count","id", "% of Total Employees")
 ```
 
 
@@ -470,13 +470,13 @@ dept_role_comb$OverTimeCount <- NULL
 ```
 
 ```{r years_at_co_merge3, echo=FALSE, include=FALSE}
-years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
-years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
-colnames(years_at_comp)[3] <- 'Avg. Years At Company'
-years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
-
-# Merge Combined and Yearst At Company
-dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
+# years_at_comp <- aggregate(df$YearsAtCompany, by=list(df$Department, df$JobRole), FUN=mean)
+# years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
+# colnames(years_at_comp)[3] <- 'Avg. Years At Company'
+# years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
+# 
+# # Merge Combined and Yearst At Company
+# dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
 ```
 
 ```{r working_years_merge3, echo=FALSE}
