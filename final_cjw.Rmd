@@ -586,6 +586,7 @@ plot_ly(x=qol_stay_data$DistanceFromHome, type = "box",name='stay') %>% add_boxp
 plot_ly(x=qol_stay_data$TotalWorkingYears, type = "box",name='stay') %>% add_boxplot(x=qol_attrition_data$TotalWorkingYears,name='leave')%>%layout(title = "TotalWorkingYears")
 
 ```
+
 ## Prototype Statistical Model to "Predict Attrition"
 <br>
 In order to aid DDSAnalytics in their efforts to effectively identify and mitigate employees at risk of attrition, we have worked to build a model that can -- based on the factors provided -- achieve some level of accuracy in determining whether an employee is an attrition risk. This does not inherently mean that an employee will leave the company. It does, however, allow DDSAnalytics to understand the specific factors that contribute to attrition, and possibly to target those employees with accommodations that may aid in their retention on the team!
