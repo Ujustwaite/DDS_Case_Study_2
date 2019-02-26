@@ -582,8 +582,9 @@ plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime 
 plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who left) ")
 plot_ly(x=qol_stay_data$DistanceFromHome, type = "box",name='stay') %>% add_boxplot(x=qol_attrition_data$DistanceFromHome,name='leave')%>%layout(title = "DistanceFromHome")
 
+plot_ly(x=qol_stay_data$MonthlyIncome,name='stay', type = "histogram") %>% add_histogram(x=qol_attrition_data$MonthlyIncome,name='leave')%>%layout(title = "MontlyIncome")
 
-plot_ly(x=qol_stay_data$TotalWorkingYears, type = "box",name='stay') %>% add_boxplot(x=qol_attrition_data$TotalWorkingYears,name='leave')%>%layout(title = "TotalWorkingYears")
+
 
 ```
 
