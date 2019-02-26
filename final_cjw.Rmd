@@ -1,5 +1,6 @@
 ---
-title: "DDS Case Study 2"
+title: "DDSAnalytics: Attrition and Job Role Study"
+author: Carl Walenciak, Brian Waite, Aditya Garapati
 output: html_document
 ---
 <style type="text/css">
@@ -51,7 +52,26 @@ df[df$Age >= 50 & df$Age < 60, ]$AgeGroup <- "50-59"
 df[df$Age >= 60, ]$AgeGroup <- "60+"
 df$AgeGroup <- factor(df$AgeGroup, level = c("<20", "20-29", "30-39", "40-49", "50-59", "60+"))
 ```
+<br> 
 
+## Introduction: 
+
+Our team is pleased to submit the following analysis in response to DDSAnalytics request for support in identifying factors contributing to attrition and any other possible trends associated with job roles within the work force and provided data set. In the conduct of analysis, we have employed a number of exploratory data analysis techniques and are confident that we have unmasked some significant insights into these requests. 
+
+<br> 
+
+## Analysis Repository: 
+
+All of the files, code, and presentation materials used in support of this submission are available to DDS Analytics at the following GitHub repository: 
+https://github.com/Ujustwaite/DDS_Case_Study_2
+
+<br> 
+
+## Workforce Overview / Initial Statistics:
+
+Being unfamiliar with the DDSAnalytics workforce or structure, we began our analysis with a robust examination of the operating construct, workforce composition, job roles, departments and other aspects contained within the data. 
+
+The data we were provided contained records for *1,470* current and former employees of DDSAnalytics. These records broke down as follows. 
 
 <!-------------------------------------------------->
 <!-------------- DEPARMENT BREAKDOWN --------------->
@@ -64,6 +84,8 @@ df$AgeGroup <- factor(df$AgeGroup, level = c("<20", "20-29", "30-39", "40-49", "
 <hr/>
 
 <br/>  
+We observed three departments within the organization. The Human Resources or HR departement was by far the smallest and Research and Development or R&D was the largest, with Sales somewhere in between. 
+<br/> 
 
 ```{r department_break, fig.align='center',  echo=FALSE}
 df_dep <- aggregate(df$EmployeeCount, by=list(df$Department), FUN=sum, drop=FALSE)
@@ -113,6 +135,8 @@ kable(df_dep, row.names = F, align=c('l',rep('c', length(df_dep) - 1) )) %>% kab
 
 <br/>  
 
+The age distribution of the population represented by the data is normally distributed as we might expect. In general, we do not see any concerning trends here with regards to the age of the workforce. In other words, there is no massive wave of retirees impending nor are there any indications of a junior-biased workforce that would indicate a lack of professional experience. We examine this further, but at this point the data appear to be representative of the national population as a whole. 
+<br/> 
 ```{r age_group_plot, fig.align='center', echo=F}
 
 (ggplot(df, aes(x=AgeGroup, y = 1, fill=Gender)) 
@@ -151,7 +175,8 @@ kable(df2, row.names = F, align=c('l',rep('c', length(df2) - 1) )) %>% kable_sty
 <hr/>
 
 <br/>  
-
+Nine (9) unique job roles were identified within the data. Sales representatives, research scientists, and laboratory technicians represent the greatest number of positions. From the below plot we can see that there is a slight gender bias in the workforce. The true percentage breakdown is 60% male and 40% female, but that distribution varies greatly by job role. Human resources representatives, for example, are overwhelmingly male (69.2%). Female concerns may not be sufficiently represented in the HR department and consideration should be given to adding additional female HR reps. Efforts could be made to improve female representation in general, because only a small number of roles are near a 50-50 distribution. 
+<br/> 
 ```{r job_role_plot, fig.align='center', echo=FALSE}
 
 (ggplot(df, aes(x=JobRole, y =1, fill = Gender)) 
