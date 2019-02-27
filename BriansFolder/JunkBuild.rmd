@@ -1,0 +1,58 @@
+---
+title: "JunkBuild"
+author: "Brian Waite"
+date: "2/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(kable)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+|Variable                        | Importance|
+|:-------------------------------|----------:|
+|OverTimeYes                     |   8.943294|
+|EnvironmentSatisfaction         |   4.681834|
+|NumCompaniesWorked              |   4.294444|
+|Age                             |   3.904021|
+|JobInvolvement                  |   3.801939|
+|JobRoleSales Representative     |   3.787701|
+|BusinessTravelTravel_Frequently |   3.346643|
+|DistanceFromHome                |   3.186858|
+|JobRoleLaboratory Technician    |   3.159774|
+|YearsSinceLastPromotion         |   3.012416|
+|RelationshipSatisfaction        |   2.795557|
+|WorkLifeBalance                 |   2.438424|
+|StockOptionLevel                |   2.315902|
+|YearsWithCurrManager            |   2.315509|
+|YearsInCurrentRole              |   2.264402|
+|MaritalStatusSingle             |   2.209577|
+|BusinessTravelTravel_Rarely     |   2.191890|
+|JobRoleSales Executive          |   2.171525|
+|JobRoleHuman Resources          |   1.986803|
+|GenderMale                      |   1.721997|
+|YearsAtCompany                  |   1.649116|
+|JobRoleResearch Scientist       |   1.355084|
+|JobRoleResearch Director        |   1.052047|
+|MaritalStatusMarried            |   1.002536|
+|JobRoleManufacturing Director   |   0.380796|
+|JobRoleManager                  |   0.051794|
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
