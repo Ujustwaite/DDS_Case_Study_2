@@ -22,8 +22,8 @@ summary(cs2Raw)
 hist(cs2Raw$Age)
 #Age looks normal, no "wave" of retirees coming. 
 
-fill <- "#4271AE"
-line <- "#1F3552"
+fill <- "cadetblue3"
+line <- "lightblue4"
 ggplot(cs2Raw, aes(x = Age)) + 
   geom_histogram(binwidth = 1.0, color=line, fill=fill) + 
   ggtitle("DDSAnalytics Employee Age Distribution")+
@@ -67,14 +67,15 @@ hist(cs2Raw$YearsSinceLastPromotion)
 #Look at Job Satisfaction Stats in different departments
 boxplot(cs2Raw$JobSatisfaction~cs2Raw$Department)
 
-fill <- "#4271AE"
-line <- "#1F3552"
+
 ggplot(cs2Raw, aes(x = Department, y = JobSatisfaction)) + 
   geom_boxplot(fill = fill, colour = line, alpha = 0.7)+ 
   scale_x_discrete(name = "Department")+
   scale_y_continuous(name = "Job Satisfaction Score Distribution", limits=c(0.5, 4.5))+
-  ggtitle("Job Satisfaction Survey Score by Department")+
-  theme_minimal()
+  ggtitle("Job Satisfaction Survey Score \nby Department")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
 
 
 #now by work role
@@ -85,7 +86,9 @@ ggplot(cs2Raw, aes(x = JobRole, y = JobSatisfaction)) +
   scale_x_discrete(name = "Job Role")+
   scale_y_continuous(name = "Job Satisfaction Score Distribution", limits=c(0.5, 4.5))+
   ggtitle("Job Satisfaction Survey Score by Job Role")+
+  theme_minimal()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
 
 #Get mean for non-HR roles
 mean_non_HR = mean(cs2Raw[which(cs2Raw$JobRole != "Human Resources"),]$JobSatisfaction)
