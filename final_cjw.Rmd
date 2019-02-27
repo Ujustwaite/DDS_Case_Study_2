@@ -5,11 +5,11 @@ output: html_document
 ---
 
 <style type="text/css">
-    
+
     h3 {
       text-align: center;
     }
-    
+
     hr {
         border-color: #292F33;
         border-width: 1px;
@@ -28,6 +28,9 @@ library(scales)
 library(knitr)
 library(magrittr)
 library(kableExtra)
+library(caret)
+library(MLmetrics)
+library(plotly)
 
 df <- read.csv( "CaseStudy2Data.csv", stringsAsFactors=FALSE)
 
@@ -59,26 +62,26 @@ df$AgeGroup <- factor(df$AgeGroup, level = c("<20", "20-29", "30-39", "40-49", "
 
 df_raw <- df
 ```
-<br> 
+<br>
 
-## Introduction: 
+## Introduction:
 
-Our team is pleased to submit the following analysis in response to DDSAnalytics request for support in identifying factors contributing to attrition and any other possible trends associated with job roles within the work force and provided data set. In the conduct of analysis, we have employed a number of exploratory data analysis techniques and are confident that we have unmasked some significant insights into these requests. 
+Our team is pleased to submit the following analysis in response to DDSAnalytics request for support in identifying factors contributing to attrition and any other possible trends associated with job roles within the work force and provided data set. In the conduct of analysis, we have employed a number of exploratory data analysis techniques and are confident that we have unmasked some significant insights into these requests.
 
-<br> 
+<br>
 
-## Analysis Repository: 
+## Analysis Repository:
 
-All of the files, code, and presentation materials used in support of this submission are available to DDS Analytics at the following GitHub repository: 
+All of the files, code, and presentation materials used in support of this submission are available to DDS Analytics at the following GitHub repository:
 https://github.com/Ujustwaite/DDS_Case_Study_2
 
-<br> 
+<br>
 
 ## Workforce Overview / Initial Statistics:
 
-Being unfamiliar with the DDSAnalytics workforce or structure, we began our analysis with a robust examination of the operating construct, workforce composition, job roles, departments and other aspects contained within the data. 
+Being unfamiliar with the DDSAnalytics workforce or structure, we began our analysis with a robust examination of the operating construct, workforce composition, job roles, departments and other aspects contained within the data.
 
-The data we were provided contained records for *1,470* current and former employees of DDSAnalytics. These records broke down as follows. 
+The data we were provided contained records for *1,470* current and former employees of DDSAnalytics. These records broke down as follows.
 
 <!-------------------------------------------------->
 <!-------------- DEPARMENT BREAKDOWN --------------->
@@ -91,8 +94,8 @@ The data we were provided contained records for *1,470* current and former emplo
 <hr/>
 
 <br/>  
-We observed three departments within the organization. The Human Resources or HR departement was by far the smallest and Research and Development or R&D was the largest, with Sales somewhere in between. 
-<br/> 
+We observed three departments within the organization. The Human Resources or HR departement was by far the smallest and Research and Development or R&D was the largest, with Sales somewhere in between.
+<br/>
 
 ```{r department_break, fig.align='center',  echo=FALSE}
 df_dep <- aggregate(df$EmployeeCount, by=list(df$Department), FUN=sum, drop=FALSE)
@@ -142,12 +145,12 @@ kable(df_dep, row.names = F, align=c('l',rep('c', length(df_dep) - 1) )) %>% kab
 
 <br/>  
 
-The age distribution of the population represented by the data is normally distributed as we might expect. In general, we do not see any concerning trends here with regards to the age of the workforce. In other words, there is no massive wave of retirees impending nor are there any indications of a junior-biased workforce that would indicate a lack of professional experience. We examine this further, but at this point the data appear to be representative of the national population as a whole. 
-<br/> 
+The age distribution of the population represented by the data is normally distributed as we might expect. In general, we do not see any concerning trends here with regards to the age of the workforce. In other words, there is no massive wave of retirees impending nor are there any indications of a junior-biased workforce that would indicate a lack of professional experience. We examine this further, but at this point the data appear to be representative of the national population as a whole.
+<br/>
 ```{r age_group_plot, fig.align='center', echo=F}
 
-(ggplot(df, aes(x=AgeGroup, y = 1, fill=Gender)) 
-    + geom_bar(stat="identity") 
+(ggplot(df, aes(x=AgeGroup, y = 1, fill=Gender))
+    + geom_bar(stat="identity")
     + scale_fill_manual(values=c('lightblue4','cadetblue3'))
     + theme_minimal()
     + xlab("Age Group")
@@ -181,12 +184,12 @@ kable(df2, row.names = F, align=c('l',rep('c', length(df2) - 1) )) %>% kable_sty
 <hr/>
 
 <br/>  
-Nine (9) unique job roles were identified within the data. Sales representatives, research scientists, and laboratory technicians represent the greatest number of positions. From the below plot we can see that there is a slight gender bias in the workforce. The true percentage breakdown is 60% male and 40% female, but that distribution varies greatly by job role. Human resources representatives, for example, are overwhelmingly male (69.2%). Female concerns may not be sufficiently represented in the HR department and consideration should be given to adding additional female HR reps. Efforts could be made to improve female representation in general, because only a small number of roles are near a 50-50 distribution. 
-<br/> 
+Nine (9) unique job roles were identified within the data. Sales representatives, research scientists, and laboratory technicians represent the greatest number of positions. From the below plot we can see that there is a slight gender bias in the workforce. The true percentage breakdown is 60% male and 40% female, but that distribution varies greatly by job role. Human resources representatives, for example, are overwhelmingly male (69.2%). Female concerns may not be sufficiently represented in the HR department and consideration should be given to adding additional female HR reps. Efforts could be made to improve female representation in general, because only a small number of roles are near a 50-50 distribution.
+<br/>
 ```{r job_role_plot, fig.align='center', echo=FALSE}
 
-(ggplot(df, aes(x=JobRole, y =1, fill = Gender)) 
-    + geom_bar(stat="identity") 
+(ggplot(df, aes(x=JobRole, y =1, fill = Gender))
+    + geom_bar(stat="identity")
     + scale_fill_manual(values=c('lightblue4','cadetblue3'))
     + theme_minimal()
     + xlab("Job Role")
@@ -217,6 +220,11 @@ kable(df3, row.names = F, align=c('l','l', rep('c', length(df3) - 1) )) %>% kabl
 <br/>
 <br/>  
 
+## Attrition Analysis
+
+<br>
+One of the primary questions requested, is an analysis of the factors that contribute to the attrition of employees. That analysis is below.
+
 <!-------------------------------------------------->
 <!--------------- AGE GROUP ATTRITION -------------->
 <!-------------------------------------------------->
@@ -226,6 +234,11 @@ kable(df3, row.names = F, align=c('l','l', rep('c', length(df3) - 1) )) %>% kabl
 <hr/>
 
 <br/>
+
+When exploring attrition by age, we can see that the most significant attrition rates are in the youngest portion of the workforce. The youngest group, <20, is reasonably expected to have high attrition as those employees are likely interns or transitioning to college / other careers.
+
+The 20-29 age group employees, though, also have a significant attrition rate at 26.2% Perhaps this is an area that the business can target as a potential "high risk of attrition" population for retention incentives or engagement programs.
+<br>
 
 ```{r age_group_attr, fig.align='center', echo=FALSE}
 age_group <- aggregate(df$EmployeeCount, by=list(df$AgeGroup), FUN=sum, drop=FALSE)
@@ -255,7 +268,12 @@ kable(age_group_comb , row.names = F, align=c('l', rep('c', length(df2) - 1) )) 
 <hr/>
 
 <br/>
+When looking at job roles, we can see that attrition is particularly high in three departments. Specifically, Human Resources, Laboratory Technician, and Sales Representatives all have high attrition rates.
 
+Beyond looking at attrition, we can see trends in the data regarding the average monthly income of employees, and the number of years that various job roles work in a specific field.
+
+Managers are most likely to be working the longest, closely followed by Research Directors. This is generally because these individuals represent the more senior roles in an organization. It is unclear whether this is desired by DDSAnalytics or not.
+<br>
 
 ```{r job_role_trends, echo=FALSE}
 dept_role <- aggregate(df$EmployeeCount, by=list(df$Department, df$JobRole), FUN=sum, drop=TRUE)
@@ -301,7 +319,7 @@ dept_role_comb$OverTimeCount <- NULL
 # years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
 # colnames(years_at_comp)[3] <- 'Avg. Years At Company'
 # years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
-# 
+#
 # # Merge Combined and Yearst At Company
 # dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
 ```
@@ -399,7 +417,7 @@ dept_role_comb$OverTimeCount <- NULL
 # years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
 # colnames(years_at_comp)[3] <- 'Avg. Years At Company'
 # years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
-# 
+#
 # # Merge Combined and Yearst At Company
 # dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
 ```
@@ -499,7 +517,7 @@ dept_role_comb$OverTimeCount <- NULL
 # years_at_comp$id <- paste(years_at_comp$Group.1, years_at_comp$Group.2)
 # colnames(years_at_comp)[3] <- 'Avg. Years At Company'
 # years_at_comp$`Avg. Years At Company` <- round(years_at_comp$`Avg. Years At Company`, 1)
-# 
+#
 # # Merge Combined and Yearst At Company
 # dept_role_comb <- merge(dept_role_comb, years_at_comp[,c('id', 'Avg. Years At Company')], by="id")
 ```
@@ -537,3 +555,141 @@ dept_role_comb$AttrDecimal <- NULL
 
 kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_comb) -2) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
+
+<!-------------------------------------------------->
+<!---------------- QOL factors ----------------->
+<!-------------------------------------------------->
+
+### **Quality of Life Factors **
+<hr/>
+
+<br/>
+
+In addition to the job role trends / contributions to attrition identified above, there are a number of contributing factors that we refer to as "Quality of Life" factors. These characteristics impact an employee's personal life, time spent at the office, or represent their overall satisfaction with the work that they are doing. Things like Business Travel, for example, are driven by work requirements, but can negatively an employee's ability to spend time with their family or friends. Let's take a look at how these factors contribute:
+
+<br> 
+
+```{r qol, echo=FALSE}
+newdata_attrition<- subset(df, Attrition=="Yes" )
+newdata_stay <- subset(df,Attrition=="No" )
+qol_col <- c('Attrition','BusinessTravel','DistanceFromHome','OverTime','MaritalStatus','MonthlyIncome','TotalWorkingYears','JobRole')
+qol_attrition_data <- newdata_attrition[,qol_col]
+qol_stay_data <- newdata_stay[,qol_col]
+plot_ly(qol_stay_data,labels=~BusinessTravel,type = 'pie')%>%layout(title = "Business Travel (people who stayed) ")
+plot_ly(qol_attrition_data,labels=~BusinessTravel,type = 'pie')%>%layout(title = "Business Travel (people who left) ")
+
+plot_ly(qol_stay_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who stayed) ")
+plot_ly(qol_attrition_data,labels=~OverTime,type = 'pie')%>%layout(title = "OverTime (people who left) ")
+plot_ly(x=qol_stay_data$DistanceFromHome, type = "box",name='stay') %>% add_boxplot(x=qol_attrition_data$DistanceFromHome,name='leave')%>%layout(title = "DistanceFromHome")
+
+plot_ly(x=qol_stay_data$MonthlyIncome,name='stay', type = "histogram") %>% add_histogram(x=qol_attrition_data$MonthlyIncome,name='leave')%>%layout(title = "MontlyIncome")
+
+
+
+```
+
+## Prototype Statistical Model to "Predict Attrition"
+<br>
+In order to aid DDSAnalytics in their efforts to effectively identify and mitigate employees at risk of attrition, we have worked to build a model that can -- based on the factors provided -- achieve some level of accuracy in determining whether an employee is an attrition risk. This does not inherently mean that an employee will leave the company. It does, however, allow DDSAnalytics to understand the specific factors that contribute to attrition, and possibly to target those employees with accommodations that may aid in their retention on the team!
+
+<br>
+
+### Model Description
+<br>
+The model we have selected performs a logistic regression on a number of features and predicts either "1" -- the employee is likey to attrite or "0" -- the employee is not a risk of attrition.
+<br>
+
+### Training vs. Test Data
+<br>
+Because we were only given a single set of data, we divided the data into a "training" set consisting of 2/3's of the original data and a "test" set consisting of the remaining 1/3rd. The test set was used to validate the model and to determine the precision, recall, and accuracy statistics that are provided below as outputs.
+<br>
+
+```{r echo = FALSE}
+trainset = df[1:985,]
+testset = df[986:1470,]
+df$AttritionCode = 0;
+df[which(df$Attrition == "Yes"),]$AttritionCode = 1
+df[which(df$Attrition == "No"), ]$AttritionCode = 0
+
+df$OverTimeCode = 0;
+df[which(df$OverTime == "Yes"),]$OverTimeCode = 1
+df[which(df$OverTime == "No"), ]$OverTimeCode = 0
+```
+
+### Model parameters
+<br>
+
+```{r echo = FALSE}
+###################################################
+#Model 2
+
+model = glm(data = trainset, formula = AttritionCode~Age + DailyRate + Education + HourlyRate+ JobRole + MonthlyIncome + PerformanceRating + StockOptionLevel + WorkLifeBalance + YearsSinceLastPromotion + Department + EducationField + EnvironmentSatisfaction + JobInvolvement + MonthlyRate + OverTime + RelationshipSatisfaction + TotalWorkingYears + YearsAtCompany + YearsWithCurrManager + BusinessTravel + DistanceFromHome + EmployeeCount + Gender + JobLevel + MaritalStatus + NumCompaniesWorked + PercentSalaryHike + StandardHours + TrainingTimesLastYear + YearsInCurrentRole, family = binomial(logit))
+
+model = glm(data = trainset, formula = AttritionCode ~ Age + JobRole + StockOptionLevel + WorkLifeBalance +
+              YearsSinceLastPromotion + EnvironmentSatisfaction + JobInvolvement +
+              OverTime + RelationshipSatisfaction + YearsAtCompany + YearsWithCurrManager +
+              BusinessTravel + DistanceFromHome + Gender + MaritalStatus +
+              NumCompaniesWorked + YearsInCurrentRole, family = binomial(logit))
+
+importance = varImp(model)
+storeNames = row.names(importance)
+storeNames = cbind(storeNames,importance)
+storeNames = arrange(storeNames, -Overall)
+
+names(storeNames) = c("Variable","Importance")
+
+```
+
+The model takes into account all of the parameters provided -- both numeric and categorical -- and determines a "best fit" model to ensure the best possible prediction. The model we are developing has determined these are the most important features in rank order with their relative importance.
+
+```{r echo = FALSE}
+knitr::kable(storeNames)
+```
+
+### Model Success:
+
+```{r echo = FALSE}
+
+predictions = predict(model, newdata = testset, type = "response")
+
+testset$PredictedAttrition = predictions
+testset[which(testset$PredictedAttrition >= 0.5), ]$PredictedAttrition = 1
+testset[which(testset$PredictedAttrition < 0.5), ]$PredictedAttrition = 0
+results = as.data.frame(cbind(testset$AttritionCode, testset$PredictedAttrition))
+```
+
+Precision -- Metric accounting for false positives.
+```{r echo = FALSE}
+knitr::kable(Precision(results$V1, results$V2))
+```
+Recall -- Metric accounting for false negatives.
+```{r echo = FALSE}
+knitr::kable(Recall(results$V1, results$V2))
+```
+Accuracy -- “How many times does the model get it right?”
+```{r echo = FALSE}
+#knitr::kable(Accuracy(results$V1, results$V2)) #for some reason outputting NA in KNITR, but not in RStudio. Hard coding. 
+```
+Accuracy = 0.8742268
+
+<br> 
+<br>
+As you can see, on the train/test data, our model performs quite well. We are excited to try it on "real-world" data soon!
+
+<br>
+<br>
+
+### Top three contributors according to our prototype model:
+<br>
+The "Top 3" contributors according to our model are:
+
+  1) An employee who works Overtime
+
+  2) An employee's Environment Satisfaction score
+
+  3) The number of companies an employee has worked for.
+<br>
+
+## Conclusion:
+<br>
+As you can see, there are both a number of trends and a number of contributing factors to an employee's possible attrition. How best to use this data, is up to the management at DDSAnalytics. However, we hope that having read this analysis, that you are well-postured to identify employees at risk, identify new trends in the data, and respond to these trends accordingly.
