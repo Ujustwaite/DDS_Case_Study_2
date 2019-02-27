@@ -572,7 +572,7 @@ In addition to the job role trends / contributions to attrition identified above
 ```{r qol, echo=FALSE}
 newdata_attrition<- subset(df, Attrition=="Yes" )
 newdata_stay <- subset(df,Attrition=="No" )
-qol_col <- c('Attrition','BusinessTravel','DistanceFromHome','OverTime','MaritalStatus','MonthlyIncome','TotalWorkingYears','JobRole')
+qol_col <- c('Attrition','BusinessTravel','DistanceFromHome','OverTime','MaritalStatus','MonthlyIncome','TotalWorkingYears','JobRole','Age')
 qol_attrition_data <- newdata_attrition[,qol_col]
 qol_stay_data <- newdata_stay[,qol_col]
 plot_ly(qol_stay_data,labels=~BusinessTravel,type = 'pie')%>%layout(title = "Business Travel (people who stayed) ")
@@ -584,6 +584,10 @@ plot_ly(x=qol_stay_data$DistanceFromHome, type = "box",name='stay') %>% add_boxp
 
 plot_ly(x=qol_stay_data$MonthlyIncome,name='stay', type = "histogram") %>% add_histogram(x=qol_attrition_data$MonthlyIncome,name='leave')%>%layout(title = "MontlyIncome")
 
+plot_ly(alpha = 0.4)%>%add_histogram(x=qol_stay_data$Age,name='stay', type = "histogram") %>% add_histogram(x=qol_attrition_data$Age,name='leave')%>%layout(title = "AGE")%>%  layout(barmode = "overlay")
+
+  
+plot_ly(alpha = 0.4)%>%add_histogram(x=qol_stay_data$MonthlyIncome,name='stay', type = "histogram") %>% add_histogram(x=qol_attrition_data$MonthlyIncome,name='leave')%>%layout(title = "MontlyIncome")%>%  layout(barmode = "overlay")  
 
 
 ```
