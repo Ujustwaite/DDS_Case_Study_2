@@ -64,20 +64,20 @@ df_raw <- df
 ```
 <br>
 
-## Introduction:
+## **Introduction**
 
 Our team is pleased to submit the following analysis in response to DDSAnalytics request for support in identifying factors contributing to attrition and any other possible trends associated with job roles within the work force and provided data set. In the conduct of analysis, we have employed a number of exploratory data analysis techniques and are confident that we have unmasked some significant insights into these requests.
 
 <br>
 
-## Analysis Repository:
+## **Analysis Repository**
 
 All of the files, code, and presentation materials used in support of this submission are available to DDS Analytics at the following GitHub repository:
 https://github.com/Ujustwaite/DDS_Case_Study_2
 
 <br>
 
-## Workforce Overview / Initial Statistics:
+## **Workforce Overview / Initial Statistics**
 
 Being unfamiliar with the DDSAnalytics workforce or structure, we began our analysis with a robust examination of the operating construct, workforce composition, job roles, departments and other aspects contained within the data.
 
@@ -146,7 +146,9 @@ kable(df_dep, row.names = F, align=c('l',rep('c', length(df_dep) - 1) )) %>% kab
 <br/>  
 
 The age distribution of the population represented by the data is normally distributed as we might expect. In general, we do not see any concerning trends here with regards to the age of the workforce. In other words, there is no massive wave of retirees impending nor are there any indications of a junior-biased workforce that would indicate a lack of professional experience. We examine this further, but at this point the data appear to be representative of the national population as a whole.
+
 <br/>
+
 ```{r age_group_plot, fig.align='center', echo=F}
 
 (ggplot(df, aes(x=AgeGroup, y = 1, fill=Gender))
@@ -220,10 +222,12 @@ kable(df3, row.names = F, align=c('l','l', rep('c', length(df3) - 1) )) %>% kabl
 <br/>
 <br/>  
 
-## Attrition Analysis
+## **Attrition Analysis**
 
-<br>
 One of the primary questions requested, is an analysis of the factors that contribute to the attrition of employees. That analysis is below.
+
+<br/>
+<br/>
 
 <!-------------------------------------------------->
 <!--------------- AGE GROUP ATTRITION -------------->
@@ -273,6 +277,7 @@ When looking at job roles, we can see that attrition is particularly high in thr
 Beyond looking at attrition, we can see trends in the data regarding the average monthly income of employees, and the number of years that various job roles work in a specific field.
 
 Managers are most likely to be working the longest, closely followed by Research Directors. This is generally because these individuals represent the more senior roles in an organization. It is unclear whether this is desired by DDSAnalytics or not.
+
 <br>
 
 ```{r job_role_trends, echo=FALSE}
@@ -556,13 +561,15 @@ dept_role_comb$AttrDecimal <- NULL
 kable(dept_role_comb, row.names = F, align=c('l','l', rep('c', length(dept_role_comb) -2) ))%>% kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
+<br/>
+<br/>
+
 <!-------------------------------------------------->
-<!---------------- QOL factors ----------------->
+<!---------------- QOL factors --------------------->
 <!-------------------------------------------------->
 
-### **Quality of Life Factors **
+### **Quality of Life Factors**
 <hr/>
-
 <br/>
 
 In addition to the job role trends / contributions to attrition identified above, there are a number of contributing factors that we refer to as "Quality of Life" factors. These characteristics impact an employee's personal life, time spent at the office, or represent their overall satisfaction with the work that they are doing. Things like Business Travel, for example, are driven by work requirements, but can negatively an employee's ability to spend time with their family or friends. Let's take a look at how these factors contribute:
@@ -588,12 +595,17 @@ plot_ly(x=qol_stay_data$MonthlyIncome,name='stay', type = "histogram") %>% add_h
 
 ```
 
+<br> 
+<br> 
 
-### Job Role and Attrition: 
+### **Job Role and Attrition**
 
+<hr/>
 <br> 
 
 Some job roles are at significant more risk of attrition. The rates (in percent) are shown in the plot below. As you can see, the turnover risk of Laboratory Technicians is very high. 
+
+<br>
 
 ```{r echo = FALSE}
 fill <- "cadetblue3"
@@ -622,21 +634,32 @@ ggplot(jobroleAttritionRates, aes(x = factor(JobRole), y = Rate)) +
   geom_bar(stat = "identity", color = line, fill = fill) +
   coord_flip()
 ```
-<br> 
 
-## Prototype Statistical Model to "Predict Attrition"
+<br> 
+<br>  
+
+## **Prototype Statistical Model to "Predict Attrition"**
+
 <br>
+
 In order to aid DDSAnalytics in their efforts to effectively identify and mitigate employees at risk of attrition, we have worked to build a model that can -- based on the factors provided -- achieve some level of accuracy in determining whether an employee is an attrition risk. This does not inherently mean that an employee will leave the company. It does, however, allow DDSAnalytics to understand the specific factors that contribute to attrition, and possibly to target those employees with accommodations that may aid in their retention on the team!
 
 <br>
-
-### Model Description
 <br>
+
+### **Model Description**
+<hr/>
+<br>
+
 The model we have selected performs a logistic regression on a number of features and predicts either "1" -- the employee is likey to attrite or "0" -- the employee is not a risk of attrition.
+
+<br>
 <br>
 
-### Training vs. Test Data
+### **Training vs. Test Data**
+<hr/>
 <br>
+
 Because we were only given a single set of data, we divided the data into a "training" set consisting of 2/3's of the original data and a "test" set consisting of the remaining 1/3rd. The test set was used to validate the model and to determine the precision, recall, and accuracy statistics that are provided below as outputs.
 <br>
 
@@ -651,8 +674,11 @@ df$OverTimeCode = 0;
 df[which(df$OverTime == "Yes"),]$OverTimeCode = 1
 df[which(df$OverTime == "No"), ]$OverTimeCode = 0
 ```
+<br>
+<br>
 
-### Model parameters
+### **Model parameters**
+<hr/>
 <br>
 
 ```{r echo = FALSE}
@@ -678,11 +704,19 @@ names(storeNames) = c("Variable","Importance")
 
 The model takes into account all of the parameters provided -- both numeric and categorical -- and determines a "best fit" model to ensure the best possible prediction. The model we are developing has determined these are the most important features in rank order with their relative importance.
 
+<br>
+
 ```{r echo = FALSE}
 knitr::kable(storeNames)
 ```
 
-### Model Success:
+<br> 
+<br>
+
+### **Model Success**
+
+<hr/>
+<br>
 
 ```{r echo = FALSE}
 
@@ -715,7 +749,8 @@ As you can see, on the train/test data, our model performs quite well. We are ex
 <br>
 <br>
 
-### Top three contributors according to our prototype model:
+### **Top three contributors according to our prototype model**
+<hr>
 <br>
 The "Top 3" contributors according to our model are:
 
@@ -724,8 +759,9 @@ The "Top 3" contributors according to our model are:
   2) An employee's Environment Satisfaction score
 
   3) The number of companies an employee has worked for.
+  
+<br>
 <br>
 
-## Conclusion:
-<br>
+## **Conclusion**
 As you can see, there are both a number of trends and a number of contributing factors to an employee's possible attrition. How best to use this data, is up to the management at DDSAnalytics. However, we hope that having read this analysis, that you are well-postured to identify employees at risk, identify new trends in the data, and respond to these trends accordingly.
